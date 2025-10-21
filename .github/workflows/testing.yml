@@ -44,7 +44,7 @@ jobs:
         path: tests/reports/coverage/
     
     - name: Upload Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: unit-test-report
@@ -76,7 +76,7 @@ jobs:
           --self-contained-html
     
     - name: Upload Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: integration-test-report
@@ -116,21 +116,21 @@ jobs:
           --self-contained-html
     
     - name: Upload E2E Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: e2e-test-report
         path: tests/reports/e2e-test-report.html
     
     - name: Upload BDD Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: bdd-test-report
         path: tests/reports/bdd-test-report.html
     
     - name: Upload Screenshots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-screenshots
@@ -161,7 +161,7 @@ jobs:
       run: k6 run tests/load/spike-test.js || true
     
     - name: Upload Load Test Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: load-test-reports
