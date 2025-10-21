@@ -1,0 +1,28 @@
+# Core dependencies
+requests>=2.31.0
+configparser>=6.0.0
+
+# Testing dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.1
+pytest-asyncio>=0.21.1
+
+# Integration testing
+responses>=0.23.3
+
+# E2E testing
+playwright>=1.40.0
+pytest-playwright>=0.4.3
+
+# BDD testing
+pytest-bdd>=6.1.1
+
+# HTML reports
+pytest-html>=4.1.1
+allure-pytest>=2.13.2
+
+# Code quality
+pylint>=3.0.0
+black>=23.10.0
+flake8>=6.1.0

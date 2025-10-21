@@ -1,0 +1,32 @@
+{
+  "balance": {
+    "available": 87654321.12345678,
+    "pending": -123456.654321
+  },
+  "transactions": [
+    {
+      "key": 1234567890,
+      "address": "nYLEKeZtqNSCAhMNKTFpFgZcnvf1DbFiSu",
+      "label": "Payment1",
+      "amount": 1000.50
+    },
+    {
+      "key": 1234567891,
+      "address": "nXYZabcdefghijklmnopqrstuvwxyz123",
+      "label": "Payment2",
+      "amount": -500.25
+    },
+    {
+      "key": 1234567892,
+      "address": "nABCdefghijklmnopqrstuvwxyz456",
+      "label": "Received",
+      "amount": 2500.00
+    }
+  ],
+  "config": {
+    "rpcuser": "testuser",
+    "rpcpassword": "testpass",
+    "rpcport": 22555,
+    "rpchost": "localhost"
+  }
+}

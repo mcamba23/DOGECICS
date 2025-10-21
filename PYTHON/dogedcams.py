@@ -315,108 +315,115 @@ def send_doge(address, amount=0, host='localhost', rpcUser=None, rpcPass=None, r
         sys.exit(-1)
     logger.debug("Reply from dogecoin wallet: {}".format(r))
 
-desc = '''DOGEdcams data generator for DOGE Bank. Used to send and receive funds between KICKS on TK4- and DogeCICS.'''
-arg_parser = argparse.ArgumentParser(description=desc, 
-                    usage='%(prog)s [options]', 
-                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-arg_parser.add_argument('-d', '--debug', help="Print lots of debugging statements", action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.WARNING)
-arg_parser.add_argument('-t', '--test', help="Test sending JCL to TK4-", action="store_true")
-arg_parser.add_argument('-p', '--print', help="Print JCL being sent to TK4", action="store_true")
-arg_parser.add_argument('-f', '--force', help="Force VSAM update even if no changes to wallet", action="store_true")
-arg_parser.add_argument('--fake', help="Generate fake records", default=None)
-arg_parser.add_argument('--username', help="TK4- username for JCL", default='herc01')
-arg_parser.add_argument('--password', help="TK4- password for JCL", default='cul8tr')
-arg_parser.add_argument('--vsam_file', help="TK4- VSAM file used by dogekicks", default='DOGE.VSAM')
-arg_parser.add_argument('--volume', help="TK4- volume to store VSAM file", default='pub012')
-arg_parser.add_argument('--rdrport', help="TK4- Reader sockdev port", default=3505)
-arg_parser.add_argument('--prtport', help="TK4- Printer sockdev port", default=3506)
-arg_parser.add_argument('--hostname',  help="TK4- sockdev host", default="localhost")
-arg_parser.add_argument('--rpcuser', help="Crypto wallet username", default=None)
-arg_parser.add_argument('--rpcpass', help="Crypto wallet password", default=None)
-arg_parser.add_argument('--rpchost', help="Crypto wallet hostname", default="localhost")
-arg_parser.add_argument('--rpcport', help="Crypto wallet port", default="22555")
-arg_parser.add_argument('--start-records-at-one', help="If there are more than 7648 records in DOGE the script will only put the 7,648 most resent transactions in VSAM. This flag reverses that action to store the first 7,648 records", action="store_false")
-args = arg_parser.parse_args()	
-
-# Create the Logger
+# Create a default logger for when module is imported
 logger = logging.getLogger(__name__)
-logger.setLevel(args.loglevel)
+logger.setLevel(logging.WARNING)
 logger_formatter = logging.Formatter('%(levelname)-8s :: %(funcName)-22s :: %(message)s')
 ch = logging.StreamHandler()
 ch.setFormatter(logger_formatter)
-ch.setLevel(args.loglevel)
+ch.setLevel(logging.WARNING)
 logger.addHandler(ch)
 
-# Print debug information
-logger.debug("Using the following script options - Debug: True, Test: {}, Print: {}, Force: {}".format(args.test, args.print, args.force))
-logger.debug("Using the following TK4- options - Hostname: {}, Username: {}, Password: {}, VSAM File: {}, Volume: {}, Reader Port: {}, Printer Port: {}".format(
-            args.hostname, args.username, "*"*len(args.password), args.vsam_file, args.volume, args.rdrport, args.prtport))
-logger.debug("Using the following Dogecoin options - RPC Host: {}, RPC User: {}, RPC Pass: {} RPC Port: {}".format(
-            args.rpchost, args.rpcuser, "*"*len(args.rpchost), args.rpcport))
-if args.test:
-    logger.debug("Test mode enabled, not getting transactions from TK4- Queue")
-if args.fake:
-    logger.debug("Generating {} fake records.".format(args.fake))
+def main():
+    """Main function for running the script"""
+    desc = '''DOGEdcams data generator for DOGE Bank. Used to send and receive funds between KICKS on TK4- and DogeCICS.'''
+    arg_parser = argparse.ArgumentParser(description=desc, 
+                        usage='%(prog)s [options]', 
+                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    arg_parser.add_argument('-d', '--debug', help="Print lots of debugging statements", action="store_const", dest="loglevel", const=logging.DEBUG, default=logging.WARNING)
+    arg_parser.add_argument('-t', '--test', help="Test sending JCL to TK4-", action="store_true")
+    arg_parser.add_argument('-p', '--print', help="Print JCL being sent to TK4", action="store_true")
+    arg_parser.add_argument('-f', '--force', help="Force VSAM update even if no changes to wallet", action="store_true")
+    arg_parser.add_argument('--fake', help="Generate fake records", default=None)
+    arg_parser.add_argument('--username', help="TK4- username for JCL", default='herc01')
+    arg_parser.add_argument('--password', help="TK4- password for JCL", default='cul8tr')
+    arg_parser.add_argument('--vsam_file', help="TK4- VSAM file used by dogekicks", default='DOGE.VSAM')
+    arg_parser.add_argument('--volume', help="TK4- volume to store VSAM file", default='pub012')
+    arg_parser.add_argument('--rdrport', help="TK4- Reader sockdev port", default=3505)
+    arg_parser.add_argument('--prtport', help="TK4- Printer sockdev port", default=3506)
+    arg_parser.add_argument('--hostname',  help="TK4- sockdev host", default="localhost")
+    arg_parser.add_argument('--rpcuser', help="Crypto wallet username", default=None)
+    arg_parser.add_argument('--rpcpass', help="Crypto wallet password", default=None)
+    arg_parser.add_argument('--rpchost', help="Crypto wallet hostname", default="localhost")
+    arg_parser.add_argument('--rpcport', help="Crypto wallet port", default="22555")
+    arg_parser.add_argument('--start-records-at-one', help="If there are more than 7648 records in DOGE the script will only put the 7,648 most resent transactions in VSAM. This flag reverses that action to store the first 7,648 records", action="store_false")
+    args = arg_parser.parse_args()	
 
-# Get records from dogecoind, check if there's any new ones, create new VSAM file
-if not args.fake:
-    vsam_records = get_records(host=args.rpchost, rpcUser=args.rpcuser, rpcPass=args.rpcpass, rpcPort=args.rpcport)
-else:
-    vsam_records = generate_fake_records(number_of_records = int(args.fake))
+    # Update logger level based on args
+    logger.setLevel(args.loglevel)
+    ch.setLevel(args.loglevel)
 
-doge_vsam_jcl = generate_IDCAMS_JCL(user=args.username,password=args.password,vsam_file=args.vsam_file,volume=args.volume,records=vsam_records, reverse=args.start_records_at_one)
+    # Print debug information
+    logger.debug("Using the following script options - Debug: True, Test: {}, Print: {}, Force: {}".format(args.test, args.print, args.force))
+    logger.debug("Using the following TK4- options - Hostname: {}, Username: {}, Password: {}, VSAM File: {}, Volume: {}, Reader Port: {}, Printer Port: {}".format(
+                args.hostname, args.username, "*"*len(args.password), args.vsam_file, args.volume, args.rdrport, args.prtport))
+    logger.debug("Using the following Dogecoin options - RPC Host: {}, RPC User: {}, RPC Pass: {} RPC Port: {}".format(
+                args.rpchost, args.rpcuser, "*"*len(args.rpchost), args.rpcport))
+    if args.test:
+        logger.debug("Test mode enabled, not getting transactions from TK4- Queue")
+    if args.fake:
+        logger.debug("Generating {} fake records.".format(args.fake))
 
-
-if not os.path.isfile("{}/{}".format(running_folder,tmp_file)) or args.force:
-    # If the tmp file doesn't exist or we need to force an update for some reason
-    if not os.path.isfile("{}/{}".format(running_folder,tmp_file)):
-        logger.debug("temp file {}/{} does not exist, creating".format(running_folder,tmp_file))
+    # Get records from dogecoind, check if there's any new ones, create new VSAM file
+    if not args.fake:
+        vsam_records = get_records(host=args.rpchost, rpcUser=args.rpcuser, rpcPass=args.rpcpass, rpcPort=args.rpcport)
     else:
-        logger.debug("forced update")
-    
-    if not args.test:
-        send_jcl(hostname=args.hostname,port=args.rdrport, jcl=doge_vsam_jcl, print_jcl=args.print)
-        logger.debug("creating: {}/{}".format(running_folder,tmp_file) )
-        with open("{}/{}".format(running_folder,tmp_file), "w") as records_file:
-            records_file.write('\n'.join(vsam_records))
-    else:
-        print("TEST MODE printing Doge records and JCL")
-        print(doge_vsam_jcl)
-else:
-    # we've already uploaded a file, do we have new records?
-    with open("{}/{}".format(running_folder,tmp_file), "r") as records_file:
-        tmp = records_file.read()
-    if new_records(tmp, '\n'.join(vsam_records)):
+        vsam_records = generate_fake_records(number_of_records = int(args.fake))
+
+    doge_vsam_jcl = generate_IDCAMS_JCL(user=args.username,password=args.password,vsam_file=args.vsam_file,volume=args.volume,records=vsam_records, reverse=args.start_records_at_one)
+
+
+    if not os.path.isfile("{}/{}".format(running_folder,tmp_file)) or args.force:
+        # If the tmp file doesn't exist or we need to force an update for some reason
+        if not os.path.isfile("{}/{}".format(running_folder,tmp_file)):
+            logger.debug("temp file {}/{} does not exist, creating".format(running_folder,tmp_file))
+        else:
+            logger.debug("forced update")
+        
         if not args.test:
             send_jcl(hostname=args.hostname,port=args.rdrport, jcl=doge_vsam_jcl, print_jcl=args.print)
-            logger.debug("updating: {}/{}".format(running_folder,tmp_file) )
+            logger.debug("creating: {}/{}".format(running_folder,tmp_file) )
             with open("{}/{}".format(running_folder,tmp_file), "w") as records_file:
                 records_file.write('\n'.join(vsam_records))
         else:
-            print("Test mode, new records found, printing JCL and old records")
-            print("OLD RECORDS: \n{}".format(tmp))
-            print("NEW RECORDS: \n{}".format('\n'.join(vsam_records)))
-            print("JCL:\n{}".format(doge_vsam_jcl))
-            
-
-# Check if there's data on the printer queue, Process the entries, Send to dogecoind server
-if not args.test:
-    logger.debug("Getting records from tk4- Class D")
-    sending = get_commands()
-    if len(sending) < 1:
-        logger.debug("Nothing to perform, exiting")
-    for line in sending:
-        logger.debug("Recieved Address: {} Amount: {}".format(line['amount'], line['address']))
-        if line['amount'] and line['address']:
-            m = str(Decimal(float(line['amount'].replace(',',''))).quantize(Decimal('1.00000000')))
-            logger.debug("Sending {} to {}".format(m,line['address']))
-            if not args.fake:
-                send_doge(address=line['address'], amount=m, host=args.rpchost, rpcUser=args.rpcuser, rpcPass=args.rpcpass, rpcPort=args.rpcport)
+            print("TEST MODE printing Doge records and JCL")
+            print(doge_vsam_jcl)
+    else:
+        # we've already uploaded a file, do we have new records?
+        with open("{}/{}".format(running_folder,tmp_file), "r") as records_file:
+            tmp = records_file.read()
+        if new_records(tmp, '\n'.join(vsam_records)):
+            if not args.test:
+                send_jcl(hostname=args.hostname,port=args.rdrport, jcl=doge_vsam_jcl, print_jcl=args.print)
+                logger.debug("updating: {}/{}".format(running_folder,tmp_file) )
+                with open("{}/{}".format(running_folder,tmp_file), "w") as records_file:
+                    records_file.write('\n'.join(vsam_records))
             else:
-                logger.debug("Fake Mode Enabled, not sending transactions printing to terminal")
-                print("Fake Mode Send: {} {}".format(line['address'], m))
-            # TODO: Refresh the VSAM file after we send this transaction.
-        else:
-            logger.debug("Address incorrect or amount missing. Not sending".format())
-    
+                print("Test mode, new records found, printing JCL and old records")
+                print("OLD RECORDS: \n{}".format(tmp))
+                print("NEW RECORDS: \n{}".format('\n'.join(vsam_records)))
+                print("JCL:\n{}".format(doge_vsam_jcl))
+                
 
+    # Check if there's data on the printer queue, Process the entries, Send to dogecoind server
+    if not args.test:
+        logger.debug("Getting records from tk4- Class D")
+        sending = get_commands()
+        if len(sending) < 1:
+            logger.debug("Nothing to perform, exiting")
+        for line in sending:
+            logger.debug("Recieved Address: {} Amount: {}".format(line['amount'], line['address']))
+            if line['amount'] and line['address']:
+                m = str(Decimal(float(line['amount'].replace(',',''))).quantize(Decimal('1.00000000')))
+                logger.debug("Sending {} to {}".format(m,line['address']))
+                if not args.fake:
+                    send_doge(address=line['address'], amount=m, host=args.rpchost, rpcUser=args.rpcuser, rpcPass=args.rpcpass, rpcPort=args.rpcport)
+                else:
+                    logger.debug("Fake Mode Enabled, not sending transactions printing to terminal")
+                    print("Fake Mode Send: {} {}".format(line['address'], m))
+                # TODO: Refresh the VSAM file after we send this transaction.
+            else:
+                logger.debug("Address incorrect or amount missing. Not sending".format())
+
+if __name__ == '__main__':
+    main()

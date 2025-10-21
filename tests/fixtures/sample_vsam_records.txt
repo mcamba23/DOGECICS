@@ -1,0 +1,6 @@
+0000000001 0                                  Available  +87654321.12345678
+0000000002 0                                  Pending    -00123456.65432100
+1234567890 nYLEKeZtqNSCAhMNKTFpFgZcnvf1DbFiSu Payment1   +00001000.50000000
+1234567891 nXYZabcdefghijklmnopqrstuvwxyz123 Payment2   -00000500.25000000
+1234567892 nABCdefghijklmnopqrstuvwxyz456    Received   +00002500.00000000
+9999999999 0                                  Control Re +00000000.00000000
