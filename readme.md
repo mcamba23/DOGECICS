@@ -42,6 +42,46 @@ Read INSTALL.md for instalation details.
 <img src="https://raw.githubusercontent.com/mainframed/DOGECICS/main/screenshots/05-DSND.png">
 
 
+## Testing
+
+DOGECICS includes a comprehensive testing suite with:
+
+* **Unit Tests**: Test individual functions with >80% coverage
+* **Integration Tests (SIT)**: Test system integration and component interactions
+* **E2E/UAT Tests**: Test complete user scenarios with BDD (Behavior-Driven Development)
+* **Load Tests**: K6-based performance testing (load, stress, spike, soak)
+
+### Quick Start
+
+```bash
+# Install test dependencies
+pip install -r requirements.txt
+
+# Run all tests
+./tests/run_all_tests.sh
+
+# Run specific test suites
+./tests/run_unit_tests.sh          # Unit tests
+./tests/run_integration_tests.sh   # Integration tests
+./tests/run_e2e_tests.sh           # E2E/UAT tests
+./tests/run_load_tests.sh          # Load tests
+```
+
+### View Reports
+
+After running tests, open the reports:
+
+```bash
+# Coverage report
+open tests/reports/coverage/index.html
+
+# Test reports
+open tests/reports/unit-test-report.html
+open tests/reports/e2e-test-report.html
+```
+
+For detailed testing documentation, see [tests/README.md](tests/README.md).
+
 ## Credits:
 
 * Philip Young (Soldier of FORTRAN)
