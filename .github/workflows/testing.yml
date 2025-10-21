@@ -18,12 +18,16 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.12'
+        cache: 'pip'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    
+    - name: Create reports directory
+      run: mkdir -p tests/reports/coverage
     
     - name: Run Unit Tests
       run: |
@@ -44,11 +48,17 @@ jobs:
         path: tests/reports/coverage/
     
     - name: Upload Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: unit-test-report
         path: tests/reports/unit-test-report.html
+    
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "## Unit Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Coverage report and test results have been uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
 
   integration-tests:
     name: Integration Tests (SIT)
@@ -60,12 +70,16 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.12'
+        cache: 'pip'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    
+    - name: Create reports directory
+      run: mkdir -p tests/reports
     
     - name: Run Integration Tests
       run: |
@@ -76,11 +90,17 @@ jobs:
           --self-contained-html
     
     - name: Upload Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: integration-test-report
         path: tests/reports/integration-test-report.html
+    
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Integration test results have been uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
 
   e2e-tests:
     name: E2E/UAT Tests
@@ -92,13 +112,17 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.12'
+        cache: 'pip'
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         playwright install --with-deps
+    
+    - name: Create reports and screenshots directories
+      run: mkdir -p tests/reports tests/screenshots
     
     - name: Run E2E Tests
       run: |
@@ -116,25 +140,31 @@ jobs:
           --self-contained-html
     
     - name: Upload E2E Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: e2e-test-report
         path: tests/reports/e2e-test-report.html
     
     - name: Upload BDD Test Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: bdd-test-report
         path: tests/reports/bdd-test-report.html
     
     - name: Upload Screenshots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-screenshots
         path: tests/screenshots/
+    
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "## E2E/UAT Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "E2E and BDD test results have been uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
 
   load-tests:
     name: Load Tests (K6)
@@ -151,18 +181,31 @@ jobs:
         sudo apt-get update
         sudo apt-get install k6
     
+    - name: Create reports directory
+      run: mkdir -p tests/reports
+    
     - name: Run Basic Load Test
-      run: k6 run tests/load/basic-load-test.js || true
+      continue-on-error: true
+      run: k6 run tests/load/basic-load-test.js
     
     - name: Run Stress Test
-      run: k6 run tests/load/stress-test.js || true
+      continue-on-error: true
+      run: k6 run tests/load/stress-test.js
     
     - name: Run Spike Test
-      run: k6 run tests/load/spike-test.js || true
+      continue-on-error: true
+      run: k6 run tests/load/spike-test.js
     
     - name: Upload Load Test Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: load-test-reports
         path: tests/reports/*-summary.json
+    
+    - name: Test Summary
+      if: always()
+      run: |
+        echo "## Load Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Load test reports have been uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
+        echo "Note: Load tests use continue-on-error to prevent blocking on infrastructure issues." >> $GITHUB_STEP_SUMMARY
